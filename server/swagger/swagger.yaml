@@ -1,0 +1,5683 @@
+openapi: 3.0.0
+info:
+  title: NLM Service API
+  description: API specification for nlm-service
+  contact:
+    email: support@nlmatics.com
+  version: 2.2.13
+servers:
+  - url: http://localhost:5000/api
+    description: NLMATICS Service API Endpoint
+tags:
+  - name: auth
+    description: endpoint for authentication
+  - name: developerApiKey
+    description: endpoint for Developer API Key
+  - name: health
+    description: endpoint for health check
+  - name: user
+    description: API to manage users
+  - name: workspace
+    description: API to manage users workspaces
+  - name: templateToFile
+    description: API to generate file from field bundle and a template
+  - name: documentFolders
+    description: API to manage document folders in workspace
+  - name: document
+    description: API to upload, query and download documents
+  - name: field
+    description: API to manage fields
+#  - name: template
+  - name: fieldBundle
+    description: API to manage field bundles (group of fields)
+  - name: extraction
+    description: API to extract field value from documents
+  - name: searchHistory
+    description: API to manage search history of users
+  - name: ingestorTestCase
+    description: API to manage ingestor test cases
+#  - name: searchTestCase
+#    description: API to manage search test cases
+  - name: audit
+    description: API to get audit information
+  - name: activeLearning
+    description: API for active learning
+  - name: usageMetrics
+    description: API for retrieving usage metrics
+  - name: notifications
+    description: API for retrieving notifications
+  - name: adminSettings
+    description: API for Admin Settings
+  - name: userFeedback
+    description: API for User Feedback
+  - name: waitList
+    description: API for adding to waitList
+  - name: promptLibrary
+    description: API for promptLibrary manipulation
+  - name: subscription
+    description: API for subscription management.
+  - name: searchCriteriaWorkflow
+    description: API for searchCriteriaWorkflow manipulation
+  - name: userAccessControl
+    description: API for User Access Control management
+  - name: anonymize
+    description: API for Anonymizing the text
+
+paths:
+
+  /auth/callback:
+    post:
+      tags:
+        - auth
+      summary: Post handler for callback from auth server
+      operationId: auth_callback_post
+      responses:
+        "200":
+          description: Handle callback from authentication server
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.authorization_controller
+      security: []
+    get:
+      tags:
+        - auth
+      summary: Get handler for callback from auth server
+      operationId: auth_callback
+      responses:
+        "200":
+          description: Handle callback from authentication server
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.authorization_controller
+      security: []
+  /auth/logout:
+    get:
+      tags:
+        - auth
+      summary: logout
+      operationId: logout
+      parameters:
+        - name: errorCode
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Handle callback from authentication server
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.authorization_controller
+      security: []
+  /auth/login:
+    get:
+      tags:
+        - auth
+      summary: login
+      operationId: login
+      parameters:
+        - name: state
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: nonce
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect user to login page
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.authorization_controller
+      security: []
+  /auth/logoutUrl:
+    get:
+      tags:
+        - auth
+      summary: Logout URL
+      operationId: logout_url
+      responses:
+        "200":
+          description: Returns logout url
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.authorization_controller
+      security: []
+  /auth/loginUrl:
+    get:
+      tags:
+        - auth
+      summary: Login URL
+      operationId: login_url
+      parameters:
+        - name: state
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: nonce
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns login url
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.authorization_controller
+      security: []
+  /auth/refreshToken:
+    post:
+      tags:
+        - auth
+      summary: Refresh access token
+      operationId: refresh_token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshToken'
+      responses:
+        "200":
+          description: Refresh access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+      x-openapi-router-controller: server.controllers.authorization_controller
+      security: []
+  /developerApiKey:
+    post:
+      tags:
+        - developerApiKey
+      summary: Generates / Re-generate a Developer API key
+      operationId: create_dev_api_key
+      responses:
+        "200":
+          description: Generates / Re-generate a Developer API key.
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.developer_api_key_controller
+  /developerApiKey/accessToken:
+    post:
+      tags:
+        - developerApiKey
+      summary: access_token
+      operationId: generate_developer_access_token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeveloperApiKey'
+      responses:
+        "200":
+          description: Access token for the developer account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+      x-openapi-router-controller: server.controllers.developer_api_key_controller
+      security: []
+  /healthz:
+    get:
+      tags:
+        - health
+      summary: Health check
+      operationId: health_check
+      responses:
+        "200":
+          description: Returns string 'Healthy!'
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.health_controller
+      security: []
+
+  /user:
+#    post:
+#      tags:
+#        - user
+#      summary: Creates a new user
+#      operationId: create_user
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/User'
+#      responses:
+#        "200":
+#          description: Returns the unique id assigned to the new user
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.user_controller
+    get:
+      tags:
+        - user
+      summary: Fetches user info by emailid
+      operationId: get_user_by_email
+      parameters:
+        - name: emailId
+          in: query
+          description: user emailid
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: "Returns the user info"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      x-openapi-router-controller: server.controllers.user_controller
+  /users/domain:
+    get:
+      tags:
+        - user
+      summary: Returns list of user emails with the same domain as the current user
+      operationId: get_user_emails_by_domain
+      responses:
+        "200":
+          description: Returns the list of user emails with the same domain as the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.user_controller
+#  /users/all:
+#    get:
+#      tags:
+#        - user
+#      summary: Returns list of all users
+#      operationId: get_all_users
+#      responses:
+#        "200":
+#          description: Returns the list of all users
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: '#/components/schemas/User'
+#                x-content-type: application/json
+#        "404":
+#          description: Users not found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.user_controller
+  /user/{userId}:
+    get:
+      tags:
+        - user
+      summary: Returns information about the user with id
+      operationId: get_user_info_by_id
+      parameters:
+        - name: userId
+          in: path
+          description: user id
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Return information about the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      x-openapi-router-controller: server.controllers.user_controller
+
+#  /user/modify/{userId}:
+#    post:
+#      tags:
+#        - user
+#      summary: Update an existing user with id
+#      operationId: update_user_by_id
+#      parameters:
+#        - name: userId
+#          in: path
+#          required: true
+#          style: simple
+#          explode: false
+#          schema:
+#            type: string
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/User'
+#      responses:
+#        "200":
+#          description: User id of the updated user
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.user_controller
+#
+#  /user/delete/{userId}:
+#    post:
+#      tags:
+#        - user
+#      summary: Delete user with given id
+#      operationId: delete_user_by_id
+#      parameters:
+#        - name: userId
+#          in: path
+#          required: true
+#          style: simple
+#          explode: false
+#          schema:
+#            type: string
+#      responses:
+#        "200":
+#          description: user id of the deleted user
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.user_controller
+
+  /workspace:
+    post:
+      tags:
+        - workspace
+      summary: Creates a new workspace for a user
+      operationId: create_new_workspace
+      parameters:
+        - name: sharedWith
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workspace'
+        required: true
+      responses:
+        "200":
+          description: Return the unique id of the newly created workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+  /workspaces/all:
+    get:
+      tags:
+        - workspace
+      summary: Returns list of all workspaces
+      operationId: get_all_workspaces
+      responses:
+        "200":
+          description: Return list of all workspaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /workspace/{workspaceId}:
+    get:
+      tags:
+        - workspace
+      summary: Return workspace for given workspaceId
+      operationId: get_workspace_by_id
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Workspace info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /workspace/modify/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Updates the workspace for given id
+      operationId: update_workspace_by_id
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workspace'
+        required: true
+      responses:
+        "200":
+          description: returns the id of the updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /workspace/delete/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Deletes the workspace for given id
+      operationId: delete_workspace_by_id
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: permanent
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: returns the id of the deleted workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /workspace/user/{userId}:
+    get:
+      tags:
+        - workspace
+      summary: Return list of workspace for user
+      operationId: get_workspaces_by_user_id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of workspaces for user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.workspace_controller
+  /workspace/archivedWorkspaces/:
+    get:
+      tags:
+        - workspace
+      summary: Return list of archived workspace for user
+      operationId: get_archived_workspace
+      responses:
+        "200":
+          description: List of workspaces for user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.workspace_controller
+  /workspace/undoArchiveWorkspace/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: undo an archive operation for a workspace
+      operationId: undo_delete_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the workspace id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+  /workspace/defaultWorkspace/{userId}:
+    get:
+      tags:
+        - workspace
+      summary: Return last used/opened workspace for user
+      operationId: get_prefered_workspace_by_user_id
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Last used/opened workspace for user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.prefered_workspace_controller
+
+  /workspace/permission/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: share the workspace to an user with permission of "editor" or "viewer"
+      operationId: add_user_permission
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: permission
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the user id and permission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+    get:
+      tags:
+        - workspace
+      summary: return permission of an user
+      operationId: get_user_permission
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the user id and permission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+  /workspace/subscribe/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Subscribes to a workspace
+      operationId: subscribe_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the workspace id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+  /workspace/unsubscribe/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Unsubscribe a workspace
+      operationId: unsubscribe_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the workspace id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+  /workspace/clone/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Clones a workspace
+      operationId: clone_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workspace'
+      responses:
+        "200":
+          description: Returns the workspace id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+#  /documentFolder:
+#    post:
+#      tags:
+#        - documentFolders
+#      summary: Creates a new folder a user's workspace
+#      operationId: create_folder
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/DocumentFolder'
+#      responses:
+#        "200":
+#          description: Returns id of the newly created folder
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.document_folders_controller
+
+  /documentFolder/{folderId}:
+    get:
+      tags:
+        - documentFolders
+      summary: Returns document folder hierarchy
+      operationId: get_folder_contents
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: folderId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: docPerPage
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: integer
+        - name: expandAll
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+        - name: nameContains
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: nameStartswith
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: sortMethod
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: reverseSort
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+        - name: filterStatus
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: filterDateFrom
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: integer
+        - name: filterDateTo
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: integer
+        - name: projectionParams
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: the document folder hierarchy
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.document_folders_controller
+
+  /documentFolder/modify/{folderId}:
+    post:
+      tags:
+        - documentFolders
+      summary: Updates name of an existing document folder
+      operationId: update_document_folder
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: newName
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the id of the updated document folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_folders_controller
+
+  /documentFolder/delete/{folderId}:
+    post:
+      tags:
+        - documentFolders
+      summary: Delete an existing folder
+      operationId: delete_document_folder
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: recursive
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Returns the id of the deleted folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_folders_controller
+
+  /document/workspace/{workspaceId}:
+    get:
+      tags:
+        - document
+      summary: List all documents in the workspace
+      operationId: get_documents_in_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: docPerPage
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: integer
+        - name: returnOnlyStatus
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Returns the document with id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.document_controller
+    post:
+      tags:
+        - document
+      summary: Uploads a new document to a workspace
+      operationId: upload_document
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: folderId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            default: root
+        - name: action
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            default: "upload"
+        - name: applyOcr
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "200":
+          description: id of the newly created document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+  /document/reIngestWorkspace/{workspaceId}:
+    get:
+      tags:
+        - document
+      summary: re-ingest all documents in workspace
+      operationId: re_ingest_documents_in_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: failedDocs
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            default: false
+        - name: applyOcr
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Returns the message status of re-ingestion
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.document_controller
+  /document/reIngestDocument/{documentId}:
+    get:
+      tags:
+        - document
+      summary: re-ingest single document in workspace
+      operationId: re_ingest_single_document_in_workspace
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: applyOcr
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Returns the message status of re-ingestion
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/sourceUrl:
+    get:
+      tags:
+        - document
+      summary: Returns document information by source url
+      operationId: get_document_info_by_source_url
+      parameters:
+        - name: url
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns document information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/yoloInference/{documentId}:
+    post:
+      tags:
+        - document
+      summary: Runs yolo inference on doc_id
+      operationId: run_ml_bbox
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: id of the newly created task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/getMlBbox/{documentId}:
+    get:
+      tags:
+        - document
+      summary: Get yolo inference result on documentId and pageId
+      operationId: get_ml_bbox
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: pageIdx
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return inference results from yolo in the db
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/{documentId}:
+    get:
+      tags:
+        - document
+      summary: Returns document information by id
+      operationId: get_document_info_by_id
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns document information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+      x-openapi-router-controller: server.controllers.document_controller
+
+
+  /document/modify/{documentId}:
+    post:
+      tags:
+        - document
+      summary: Upload a new file to replace the document with id
+      operationId: modify_document_by_id
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body_1'
+      responses:
+        "200":
+          description: Returns id of the updated document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/delete/{documentId}:
+    post:
+      tags:
+        - document
+      summary: Delete an existing document
+      operationId: delete_document_by_id
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: permanent
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Returns the id of the deleted document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/rename/{documentId}:
+    post:
+      tags:
+        - document
+      summary: Rename document
+      operationId: rename_document_by_id
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenameDoc'
+      responses:
+        "200":
+          description: Returns document information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/update/{documentId}:
+    post:
+      tags:
+        - document
+      summary: Update information about a document
+      operationId: update_document_by_id
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain:
+                  type: string
+      responses:
+        "200":
+          description: returns the id of the updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/download/{documentId}:
+    get:
+      tags:
+        - document
+      summary: Download a document identified by docId
+      operationId: download_document_by_id
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: renderFormat
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            default: original
+      responses:
+        "200":
+          description: the file content
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+                x-content-type: '*/*'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/keyInfo/{documentId}:
+    get:
+      tags:
+        - document
+      summary: Download a document identified by docId
+      operationId: get_document_key_info_by_id
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns the field templates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentKeyInfo'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/reIngestAll:
+    get:
+      tags:
+        - document
+      summary: re-ingest all documents
+      operationId: re_ingest_all_documents
+      responses:
+        "200":
+          description: Returns the message status of re-ingestion
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/uploadByUrl/{workspaceId}:
+    post:
+      tags:
+        - document
+      summary: upload an html document by url
+      operationId: upload_by_url
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HTMLUpload'
+      responses:
+        "200":
+          description: Returns the message status of re-ingestion
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/developer/uploadAndParse:
+    post:
+      tags:
+        - document
+      summary: Upload a new document and parse
+      operationId: upload_and_parse_document
+      parameters:
+        - name: renderFormat
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+        - name: startPage
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+        - name: endPage
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "200":
+          description: id of the newly created document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /document/status/{workspaceId}:
+    get:
+      tags:
+        - document
+      summary: Retrieve status of documents
+      operationId: get_doc_status_in_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns the status of documents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+
+  /field:
+    post:
+      tags:
+        - field
+      summary: Add New User defined Field (no bundle)
+      operationId: create_field
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Field'
+      responses:
+        "200":
+          description: returns the id of newly created field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_controller
+    get:
+      tags:
+        - field
+      summary: Retrieves field details from a field Bundle or from the list of field Ids
+      operationId: get_field_details
+      parameters:
+        - name: fieldBundleId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: fieldIds
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: returnOnlyStatus
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: returns the list of field details from the field bundle
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Field'
+      x-openapi-router-controller: server.controllers.field_controller
+
+  /fieldValue:
+    post:
+      tags:
+        - fieldValue
+      summary: Add New User defined FieldValue
+      operationId: create_field_value
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FieldValue'
+      responses:
+        "200":
+          description: returns the id of newly created field value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_value_controller
+    get:
+      tags:
+        - fieldValue
+      summary: Return field value for the specified workspaceId/fieldBundleId/fieldId/documentId combination.
+      operationId: get_field_value
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: docId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns the field value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldValue'
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+
+  /fieldValue/bulkApprove:
+    get:
+      tags:
+        - fieldValue
+      summary: Add New User defined FieldValue in bulk
+      operationId: bulk_approve
+      parameters:
+        - name: fieldId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: workspaceId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: docId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns the id of newly created field value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  modified_count:
+                    type: number
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/bulkDisapprove:
+    get:
+      tags:
+        - fieldValue
+      summary: Add New User defined FieldValue in bulk
+      operationId: bulk_disapprove
+      parameters:
+        - name: fieldId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: workspaceId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: docId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns the id of newly created field value
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  modified_count:
+                    type: number
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/stats:
+    get:
+      tags:
+        - fieldValue
+      summary: Retrieve the statistics table for the workspaceID - fieldBundleId combination.
+      operationId: build_stats_table
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns statistics table for the workspaceID - fieldBundleId combination.
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/field/delete/{docId}/{fieldId}:
+    post:
+      tags:
+        - fieldValue
+      summary: Deletes a field value
+      operationId: delete_field_values_by_field_id
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: docId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the top fact.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/relations/knowledgeGraph/{workspaceId}:
+    get:
+      tags:
+        - fieldValue
+      summary: Gets graphical representaion of a relation field value in json format
+      operationId: get_workspace_knowledge_graph
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: selectedNode
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+        - name: depth
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: integer
+        - name: refresh
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: returns graphjson
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/relations/edgeTopicFacts/{fieldId}:
+    get:
+      tags:
+        - fieldValue
+      summary: Gets all the topic facts that are in a relation
+      operationId: get_relation_edge_topic_facts
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: relationHead
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+        - name: relationTail
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns a list of topic facts
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/relations/graph/{fieldId}:
+    get:
+      tags:
+        - fieldValue
+      summary: Gets graphical representaion of a relation field value in json format
+      operationId: get_relation_field_graph
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns graphjson
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/relations/tree/{fieldId}:
+    get:
+      tags:
+        - fieldValue
+      summary: Gets tree representaion of a relation field value in json format
+      operationId: get_relation_field_tree
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns graphjson in tree format
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /fieldValue/relations/autocomplete/{workspaceId}:
+    get:
+      tags:
+        - fieldValue
+      summary: autocomplete search for relation nodes search text
+      operationId: autocomplete_relation_node
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: fieldId
+          in: query
+          required: false
+          style: form
+          explode: false
+          schema:
+            type: string
+        - name: searchText
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns nodes matching search text
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: server.controllers.field_value_controller
+
+  /field/{fieldId}:
+    get:
+      tags:
+        - field
+      summary: Returns the field by given id
+      operationId: get_field_by_field_id
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: returns the field templates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+      x-openapi-router-controller: server.controllers.field_controller
+
+  /field/modify/{fieldId}:
+    post:
+      tags:
+        - field
+      summary: Updates the field by given id
+      operationId: update_field_by_field_id
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: action
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+            enum:
+              - replace
+              - append
+              - modify
+            default: replace
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Field'
+      responses:
+        "200":
+          description: returns the field templates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+      x-openapi-router-controller: server.controllers.field_controller
+
+  /field/clone/{fieldId}:
+    post:
+      tags:
+        - field
+      summary: Clones the field by given id to a specified target workspace and target bundle id
+      operationId: clone_field
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: targetWorkspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: targetFieldBundleId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: targetFieldName
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns the newly created field id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_controller
+
+  /field/delete/{fieldId}:
+    post:
+      tags:
+        - field
+      summary: Deletes a field by field ID
+      operationId: delete_field_by_field_id
+      parameters:
+        - name: fieldId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deletes field by field id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_controller
+
+  /subscription/changePlan:
+    post:
+      tags:
+        - subscription
+      summary: change plan to a new plan
+      operationId: change_plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lookup_key:
+                  type: object
+              required:
+                - lookup_key
+      responses:
+        "200":
+          description: change plan to a new plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.subscription_controller
+
+  /subscription/cancelPlan:
+    post:
+      tags:
+        - subscription
+      summary: cancel subscription to an existing plan
+      operationId: cancel_plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lookup_key:
+                  type: object
+              required:
+                - lookup_key
+      responses:
+        "200":
+          description: change plan to a new plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.subscription_controller
+
+  /subscription/handleCheckoutSuccess:
+    get:
+      tags:
+        - subscription
+      summary: handles success of checkout
+      operationId: handle_checkout_success
+      parameters:
+        - name: checkout_id
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: handles success of Stripe checkout session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.subscription_controller
+      security: []
+
+  /subscription/handleCheckoutCancel:
+    get:
+      tags:
+        - subscription
+      summary: handles cancel of checkout
+      operationId: handle_checkout_cancel
+      parameters:
+        - name: checkout_id
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: cancels a subscription portal session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.subscription_controller
+      security: []
+
+  /subscription/getPlans:
+    get:
+      tags:
+        - subscription
+      summary: gets all possible plans for the logged in user
+      operationId: get_plans
+      responses:
+        "200":
+          description: gets all possible plans for the logged in user
+          content:
+            application/json:
+              schema:
+                type: object
+      x-openapi-router-controller: server.controllers.subscription_controller
+
+  /subscription/stripe_webhooks:
+    post:
+      tags:
+        - subscription
+      summary: Recieve Webhooks from Stripe
+      operationId: webhook_received
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: change plan to a new plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.subscription_controller
+      security: []
+
+#  /template/modify:
+#    post:
+#      tags:
+#        - template
+#      summary: update template with given id
+#      operationId: update_template_by_id
+#      parameters:
+#        - name: templateId
+#          in: query
+#          required: true
+#          style: form
+#          explode: true
+#          schema:
+#            type: string
+#        - name: fieldId
+#          in: query
+#          required: true
+#          style: form
+#          explode: true
+#          schema:
+#            type: string
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/Template'
+#      responses:
+#        "200":
+#          description: return id of the updated template
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.template_controller
+#
+#  /template:
+#    post:
+#      tags:
+#        - template
+#      summary: Create a new template for a given field id
+#      operationId: create_new_template_for_field_with_given_id
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/Template'
+#      responses:
+#        "200":
+#          description: Returns the id of the newly created template
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.template_controller
+#
+#  /template/delete:
+#    post:
+#      tags:
+#        - template
+#      summary: Delete the template with given id
+#      operationId: delete_template_by_id
+#      parameters:
+#        - name: templateId
+#          in: query
+#          required: true
+#          style: form
+#          explode: true
+#          schema:
+#            type: string
+#        - name: fieldId
+#          in: query
+#          required: true
+#          style: form
+#          explode: true
+#          schema:
+#            type: string
+#      responses:
+#        "200":
+#          description: Returns the id of the deleted template
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/IdWithMessage'
+#      x-openapi-router-controller: server.controllers.template_controller
+
+  /templateToFile/download:
+    get:
+      tags:
+        - templateToFile
+      summary: Generate a file using template and field bundle
+      operationId: generate_document
+      parameters:
+        - name: fieldBundleId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: documentId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: extractionTemplateId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Return the file details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+      x-openapi-router-controller: server.controllers.generate_document_controller
+  /templateToFile/{workspaceId}:
+    post:
+      tags:
+        - templateToFile
+      summary: Uploads a template file to a workspace
+      operationId: upload_template
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "200":
+          description: id of the newly created template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.generate_document_controller
+    get:
+      tags:
+        - templateToFile
+      summary: Get the list of templates in the workspace
+      operationId: get_workspace_templates
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: list of workspaces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.generate_document_controller
+  /fieldBundle:
+    post:
+      tags:
+        - fieldBundle
+      summary: Create a new field bundle
+      operationId: create_new_field_bundle
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FieldBundle'
+      responses:
+        "200":
+          description: Return id of the newly created field bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+    get:
+      tags:
+        - fieldBundle
+      summary: Retrives field bundles in a workspace
+      operationId: get_field_bundles_in_workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: returns the list of field bundles available in the workspace
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldBundle'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /fieldBundle/{fieldBundleId}:
+    get:
+      tags:
+        - fieldBundle
+      summary: Returns fieldBundle information
+      operationId: get_field_bundle_info
+      parameters:
+        - name: fieldBundleId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return information about the fieldbundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldBundle'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+    post:
+      tags:
+        - fieldBundle
+      summary: Uploads a new field defintion from the file.
+      operationId: upload_fields_from_file
+      parameters:
+        - name: fieldBundleId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "200":
+          description: id of the newly created document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /fieldBundle/modify/{fieldBundleId}:
+    post:
+      tags:
+        - fieldBundle
+      summary: Updates a field bundle
+      operationId: update_field_bundle_by_id
+      parameters:
+        - name: fieldBundleId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FieldBundle'
+      responses:
+        "200":
+          description: returns id of the updated field bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /fieldBundle/delete/{fieldBundleId}:
+    post:
+      tags:
+        - fieldBundle
+      summary: Deletes a field bundle
+      operationId: delete_field_bundle
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return id of the deleted field
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /fields/relations/{workspaceId}:
+    get:
+      tags:
+        - field
+      summary: Get all the relation fields (with details) from a workspace
+      operationId: get_relation_fields_in_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return information about the relation fields in workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+      x-openapi-router-controller: server.controllers.field_controller
+
+  /fieldIdsInfo/{fieldBundleId}:
+    get:
+      tags:
+        - fieldBundle
+      summary: Returns id and names of all fields in field bundle
+      operationId: get_field_info_from_field_bundle_id
+      parameters:
+        - name: fieldBundleId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return information about the fields in field bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+  /fieldBundle/content/{bundleId}:
+    get:
+      tags:
+        - fieldBundle
+      summary: Retrieves the contents of a field bundle (including fields, templates)
+      operationId: get_field_bundle_contents
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the contents of the field bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldBundleContent'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /fieldBundle/export/{fieldBundleId}:
+    get:
+      tags:
+        - fieldBundle
+      summary: download fieldBundle information in exportable file format
+      operationId: download_field_definitions
+      parameters:
+        - name: fieldBundleId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: the file content
+          content:
+            '*/*':
+              schema:
+                type: string
+                x-content-type: '*/*'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /replicateFieldBundle/workspace/{workspaceId}:
+    get:
+      tags:
+        - fieldBundle
+      summary: Replicate field bundle
+      operationId: replicate_using_field_bundle_id
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: string
+        - name: targetFieldBundleName
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: createFieldBundle
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Returns the list of extracted values
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldBundle'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /fieldBundle/field:
+    post:
+      tags:
+        - fieldBundle
+      summary: Adds an existing Field to a FieldBundle (does not create a new field)
+      operationId: add_field_to_field_bundle
+      parameters:
+        - name: fieldBundleId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return id of the Field added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /fieldBundle/delete/field:
+    post:
+      tags:
+        - fieldBundle
+      summary: Remove Field from a FieldBundle (does not delete the field itself)
+      operationId: remove_field_from_field_bundle
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Return the id of Field/FieldBundle removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.field_bundle_controller
+
+  /extractFieldBundle/doc/{docId}:
+    get:
+      tags:
+        - extraction
+      summary: Extracts values of fields from fieldBundle for the specified document
+      operationId: extract_field_bundle_from_document
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: string
+        - name: overwriteCache
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: fieldIds
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Returns the list of extracted values
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldValue'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /extractFieldBundle/workspace/{workspaceId}:
+    get:
+      tags:
+        - extraction
+      summary: Extracts values of fields from fieldBundle for the specified workspace
+      operationId: extract_field_bundle_from_workspace
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: true
+          explode: true
+          schema:
+            type: string
+        - name: overwriteCache
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: fieldIds
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        "200":
+          description: Returns the list of extracted values
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldValue'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /extractFieldBundle/allWorkspaces:
+    get:
+      tags:
+        - extraction
+      summary: Extracts values of fields from fieldBundle for all workspaces
+      operationId: extract_all_fields_all_workspaces
+      responses:
+        "200":
+          description: Returns the list of extracted values
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldValue'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /extractFieldBundle/gridData:
+    post:
+      tags:
+        - extraction
+      summary: Extracts grid data for the field bundle
+      operationId: extract_field_bundle_grid_data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GridSelector'
+      responses:
+        "200":
+          description: Returns the list of extracted values
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FieldValue'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /extractFieldBundle/download:
+    get:
+      tags:
+        - extraction
+      summary: Download extracted field values for the provided Field Bundle
+      operationId: download_field_bundle_grid_data
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: the file content
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+                x-content-type: '*/*'
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /adhocExtraction/doc/{docId}:
+    post:
+      tags:
+        - extraction
+      summary: Runs adhoc extraction on a workspace using provided criteria
+      operationId: run_adhoc_extraction_on_document_post
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: aclEmailId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchCriteria'
+        required: true
+      responses:
+        200:
+          description: Returns the extraction result
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /adhocExtraction/workspace/{workspaceId}:
+    post:
+      tags:
+        - extraction
+      summary: Runs adhoc extraction on a document using provided criteria
+      operationId: run_adhoc_extraction_on_workspace_post
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: aclEmailId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchCriteria'
+        required: true
+      responses:
+        200:
+          description: Returns the extraction result
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /search/workspace/{workspaceId}:
+    post:
+      tags:
+        - search
+      summary: Runs search on a document using provided criteria
+      operationId: run_search_on_workspace_post
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchCriteria'
+        required: true
+      responses:
+        200:
+          description: Returns the search result
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.extraction_controller
+
+  /searchHistory:
+    get:
+      tags:
+        - searchHistory
+      summary: Get user's search history by query by last number of days
+      operationId: get_search_history_by_days
+      parameters:
+        - name: idType
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: integer
+        - name: workspaceId
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns search history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type:
+                    string
+      x-openapi-router-controller: server.controllers.search_history_controller
+
+  /ingestorTestCase/page:
+    get:
+      tags:
+        - ingestorTestCase
+      summary: Gets testcase by workspace
+      operationId: get_test_case_by_workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+    post:
+      tags:
+        - ingestorTestCase
+      summary: Creates ingestor testcase db entry
+      operationId: create_ingestor_test_case
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTestCase'
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /ingestorTestCase/modify/page:
+    post:
+      tags:
+        - ingestorTestCase
+      summary: Removes approved testcases from db
+      operationId: undo_ingest_test_case_approval
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTestCase'
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /ingestorTestCase/table:
+    # get:
+    #   tags:
+    #   - ingestorTestCase
+    #   summary: run ingestor tests for tables for one document or all
+    #   operationId: run_test_table
+    #   parameters:
+    #   - name: workspaceId
+    #     in: query
+    #     required: true
+    #     explode: false
+    #     schema:
+    #       type: string
+    #   responses:
+    #     200:
+    #       description: Returns the file content
+    #       content:
+    #         application/json:
+    #           schema: {}
+    #   x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+    post:
+      tags:
+        - ingestorTestCase
+      summary: Insert well parsed table into database
+      operationId: add_correct_table
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTableTestCase'
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /ingestorTestCase/modify/table:
+    post:
+      tags:
+        - ingestorTestCase
+      summary: Removes table test case from db
+      operationId: remove_table_test_case
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTableTestCase'
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /ingestorTestCase/flagPage:
+    post:
+      tags:
+        - ingestorTestCase
+      summary: store page, docId, userId, workspaceId
+      operationId: flag_page
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTableTestCase'
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /ingestorTestCase/modify/flagPage:
+    post:
+      tags:
+        - ingestorTestCase
+      summary: store page, docId, userId, workspaceId
+      operationId: undo_flagged_page
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_idx:
+                  type: integer
+                doc_id:
+                  type: string
+                workspace_id:
+                  type: string
+                user_id:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /ingestorTestCase/flagTable:
+    post:
+      tags:
+        - ingestorTestCase
+      summary: Store flagged table
+      operationId: flag_table
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_idx:
+                  type: integer
+                doc_id:
+                  type: string
+                workspace_id:
+                  type: string
+                user_id:
+                  type: string
+                table_html:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /ingestorTestCase/modify/flagTable:
+    post:
+      tags:
+        - ingestorTestCase
+      summary: Store flagged table
+      operationId: undo_flagged_table
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_idx:
+                  type: integer
+                doc_id:
+                  type: string
+                workspace_id:
+                  type: string
+                user_id:
+                  type: string
+                table_html:
+                  type: string
+        required: true
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema: {}
+      x-openapi-router-controller: server.controllers.ingestor_test_case_controller
+
+  /startTraining:
+    get:
+      tags:
+        - startTraining
+      summary: starts training with active learning samples
+      operationId: start_training
+      responses:
+        200:
+          description: Returns the training samples
+          content:
+            application/json:
+              schema:
+                type: array
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.active_learning_controller
+
+  /trainingSamples:
+    get:
+      tags:
+        - trainingSamples
+      summary: gets active learning training samples
+      operationId: get_training_samples
+      parameters:
+        - name: status
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        200:
+          description: Returns the training samples
+          content:
+            application/json:
+              schema:
+                type: array
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.active_learning_controller
+  /trainingSamples/status:
+    get:
+      tags:
+        - trainingSamples
+      summary: Return the status of training samples
+      operationId: get_unique_training_samples_status
+      responses:
+        200:
+          description: Return the status of training samples
+          content:
+            application/json:
+              schema:
+                type: array
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.active_learning_controller
+
+  /trainingSamples/modify:
+    post:
+      tags:
+        - trainingSamples
+      summary: Update status of existing training sample with id
+      operationId: update_training_sample_status
+      requestBody:
+        content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+      responses:
+        "200":
+          description: user id of the updated training sample
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.active_learning_controller
+
+
+  /yoloTraining:
+    get:
+      tags:
+        - start yoloTraining
+      summary: starts training with active learning samples
+      operationId: active_learning_yolo
+      responses:
+        200:
+          description: Returns the training samples
+          content:
+            application/json:
+              schema:
+                type: array
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.active_learning_controller
+
+
+  /searchResult:
+    post:
+      tags:
+        - searchResults
+      summary: Stores Search Result in DB
+      operationId: save_search_result
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedSearchResult'
+      responses:
+        200:
+          description: Returns the file content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearchResult'
+      x-openapi-router-controller: server.controllers.search_result_controller
+
+  /searchResult/delete:
+    post:
+      tags:
+        - searchResults
+      summary: Delete saveSearchResult with given id and doc_id
+      operationId: delete_saved_search_result
+      parameters:
+        - name: docId
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+        - name: uniqueId
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: user id of the deleted user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.search_result_controller
+
+  /savedSearchResults/{docId}/{action}:
+    get:
+      tags:
+        - searchResults
+      summary: Returns list of all saved search by action.
+      operationId: get_saved_searches_by_action
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: action
+          in: path
+          required: true
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Return list of all workspaces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedSearchResult'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.search_result_controller
+
+
+#  /searchTestCase:
+#    get:
+#      tags:
+#        - searchTestCase
+#      summary: get document search test-cases
+#      operationId: get_doc_search_results
+#      parameters:
+#        - name: wsId
+#          in: query
+#          required: true
+#          explode: false
+#          schema:
+#            type: string
+#        - name: docId
+#          in: query
+#          required: true
+#          explode: false
+#          schema:
+#            type: string
+#      responses:
+#        200:
+#          description: Returns the file content
+#          content:
+#            application/json:
+#              schema: {}
+#      x-openapi-router-controller: server.controllers.search_test_case_controller
+#
+#    post:
+#      tags:
+#        - searchTestCase
+#      summary: Stores Search Result in DB
+#      operationId: store_search_result
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/SearchResult'
+#      responses:
+#        200:
+#          description: Returns the file content
+#          content:
+#            application/json:
+#              schema: {}
+#      x-openapi-router-controller: server.controllers.search_test_case_controller
+#
+#  /searchTestCase/modify:
+#    post:
+#      tags:
+#        - searchTestCase
+#      summary: Stores Search Result in DB
+#      operationId: remove_approved_search_result
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/SearchResult'
+#      responses:
+#        200:
+#          description: Returns the file content
+#          content:
+#            application/json:
+#              schema: {}
+#      x-openapi-router-controller: server.controllers.search_test_case_controller
+#
+#  /searchTestCase/flag:
+#    get:
+#      tags:
+#        - searchTestCase
+#      summary: retrieves flagged test casese from db
+#      operationId: get_flagged_search_results
+#      parameters:
+#        - name: wsId
+#          in: query
+#          required: true
+#          explode: false
+#          schema:
+#            type: string
+#        - name: docId
+#          in: query
+#          required: true
+#          explode: false
+#          schema:
+#            type: string
+#      responses:
+#        200:
+#          description: Returns the file content
+#          content:
+#            application/json:
+#              schema: {}
+#      x-openapi-router-controller: server.controllers.search_test_case_controller
+#
+#    post:
+#      tags:
+#        - searchTestCase
+#      summary: Flags search and stores in db
+#      operationId: flag_search_result
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/SearchResult'
+#      responses:
+#        200:
+#          description: Returns the file content
+#          content:
+#            application/json:
+#              schema: {}
+#      x-openapi-router-controller: server.controllers.search_test_case_controller
+#
+#  /searchTestCase/flag/modify:
+#    post:
+#      tags:
+#        - searchTestCase
+#      summary: Undo flagged search result
+#      operationId: remove_flagged_result
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/SearchResult'
+#      responses:
+#        200:
+#          description: Returns the file content
+#          content:
+#            application/json:
+#              schema: {}
+#      x-openapi-router-controller: server.controllers.search_test_case_controller
+#
+#  /searchTestCase/runTest:
+#    get:
+#      tags:
+#        - searchTestCase
+#      summary: run test cases from db
+#      operationId: run_test
+#      parameters:
+#        - name: workspaceId
+#          in: query
+#          required: false
+#          explode: false
+#          schema:
+#            type: string
+#        - name: docId
+#          in: query
+#          required: false
+#          explode: false
+#          schema:
+#            type: string
+#      responses:
+#        200:
+#          description: Returns the file content
+#          content:
+#            application/json:
+#              schema: {}
+#      x-openapi-router-controller: server.controllers.search_test_case_controller
+
+  /audit:
+    post:
+      tags:
+        - audit
+      summary: Get audit level information using workspace_id
+      operationId: get_audit_report
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          explode: false
+          schema:
+            type: string
+        - name: startDateTime
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: endDateTime
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: outputFormat
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+            default: csv
+      responses:
+        "200":
+          description: Returns the audit report for workspace_id
+          content:
+            '*/*':
+              schema:
+                type: string
+                x-content-type: '*'
+      x-openapi-router-controller: server.controllers.audit_controller
+
+  /addPrivateDictionary/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Uploads a template file to a workspace
+      operationId: add_private_dictionary
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "200":
+          description: id of the workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /removePrivateDictionary/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Removes the private dictionary applied on the Workspace
+      operationId: remove_private_dictionary
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: id of the workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /updateDocumentsMetaInIndex/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Uploads meta for documents in workspace
+      operationId: update_documents_meta_in_index
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: id of the workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /uploadData/{workspaceId}/{fileNameColumn}/{titleStartColumn}/{titleEndColumn}:
+    post:
+      tags:
+        - workspace
+      summary: Uploads a template file to a workspace
+      operationId: upload_data
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: fileNameColumn
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+        - name: titleStartColumn
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+        - name: titleEndColumn
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "200":
+          description: id of the workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /ignoreBlock/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Add new User defined ignoreBlock
+      operationId: create_ignore_block
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IgnoreBlock'
+      responses:
+        "200":
+          description: returns the id of newly created IgnoreBlock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+  /updateWorkspaceSettings/{workspaceId}:
+    post:
+      tags:
+        - workspace
+      summary: Update the settings for a workspace
+      operationId: update_workspace_settings
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain:
+                  type: string
+      responses:
+        "200":
+          description: returns the id of the updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.workspace_controller
+
+
+  /history/recentOpenedDocs/{docId}:
+    post:
+      tags:
+        - history
+      summary: logs history when user opens a file
+      operationId: add_recent_opened_document
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.history_controller
+  /history/getWorkspaceDashboardData/{workspaceId}:
+    get:
+      tags:
+        - history
+      summary: logs history when user opens a file
+      operationId: get_workspace_dashboard_data
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: ndoc
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns array of file opening history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type:
+                    string
+      x-openapi-router-controller: server.controllers.history_controller
+
+
+  /bbox/{docId}:
+    post:
+      tags:
+        - bbox
+      summary: endpoint for bbox options
+      operationId: update_bbox
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BBox'
+      responses:
+        "200":
+          description: return
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.bbox_controller
+    get:
+      tags:
+        - bbox
+      summary: endpoint for bbox options
+      operationId: get_bbox_by_doc_id
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: auditedOnly
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: return
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BBox'
+      x-openapi-router-controller: server.controllers.bbox_controller
+
+  /bbox/delete/{docId}/{pageId}:
+    post:
+      tags:
+        - bbox
+      summary: endpoint for deleting bbox by page
+      operationId: delete_bbox
+      parameters:
+        - name: docId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        - name: pageId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: return
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.bbox_controller
+
+  /task:
+    post:
+      tags:
+        - task
+      summary: get a list of tasks with a query
+      operationId: get_tasks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskQuery'
+      responses:
+        "200":
+          description: Returns a list of tasks sorted by time
+          content:
+            application/json:
+              schema:
+                type: array
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.task_controller
+
+  /activeLearning:
+    post:
+      tags:
+        - activeLearning
+      summary: Creates a new training sample.
+      operationId: add_sample_for_model_training
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TrainSample"
+      responses:
+        "200":
+          description: Returns the unique id assigned to the new training sample
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.train_sample_controller
+    get:
+      tags:
+        - activeLearning
+      summary: Trigger active learning on approved field value
+      operationId: active_learning_on_field_value
+      parameters:
+        - name: fieldId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: fieldBundleId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: workspaceId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: docId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: updateWorkers
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: return the records been learned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  modified_count:
+                    type: number
+      x-openapi-router-controller: server.controllers.active_learning_controller
+
+  /usageMetrics:
+    get:
+      tags:
+        - usageMetrics
+      summary: Returns usage metrics for the user with the options
+      operationId: get_usage_metrics
+      parameters:
+        - name: year
+          in: query
+          description: Year for which metrics has to be retrieved
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: month
+          in: query
+          description: Month for which metrics has to be retrieved
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns usage metrics for the user with the options
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsageMetric'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.usage_metrics_controller
+
+  /notifications:
+    get:
+      tags:
+        - notifications
+      summary: Returns unread notifications for the user
+      operationId: get_notifications
+      parameters:
+        - name: includeRead
+          in: query
+          description: Include Read notifications for the user
+          required: false
+          explode: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Returns unread notifications for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notifications'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.notifications_controller
+
+  /notifications/modify:
+    post:
+      tags:
+        - notifications
+      summary: Update is_read parameter of the list of notification ids
+      operationId: update_is_read
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        "200":
+          description: Successfully updated
+          content:
+            application/json:
+              schema:
+                type: string
+      x-openapi-router-controller: server.controllers.notifications_controller
+
+  /updateGlobalParams:
+    post:
+      tags:
+        - adminSettings
+      summary: Updates the global parameters maintained in Cache
+      operationId: update_global_params
+      responses:
+        "200":
+          description: Successfully updated the global parameters maintained
+      x-openapi-router-controller: server.controllers.admin_settings_controller
+
+  /userFeedback:
+    post:
+      tags:
+        - userFeedback
+      summary: Creates / Updates a user feedback.
+      operationId: add_user_feedback
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserFeedback"
+      responses:
+        "200":
+          description: Returns the unique id assigned to the user feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.user_feedback_controller
+
+  /waitList:
+    post:
+      tags:
+        - waitList
+      summary: Creates an entry in the wait list.
+      operationId: add_to_wait_list
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaitList"
+      responses:
+        "200":
+          description: Returns the unique id assigned to the wait list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.wait_list_controller
+
+  /anonymize:
+    post:
+      tags:
+        - anonymize
+      summary: Anonymize the provided text.
+      operationId: anonymize_text
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnonymizeText"
+      responses:
+        "200":
+          description: Returns the unique id, anonymized text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.anonymize_controller
+      security: []
+
+
+  /deanonymize:
+    post:
+      tags:
+        - anonymize
+      summary: De-Anonymize the provided text.
+      operationId: de_anonymize_text
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeAnonymizeText"
+      responses:
+        "200":
+          description: Returns the de-anonymized text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.anonymize_controller
+      security: []
+
+  /promptLibrary:
+    post:
+      tags:
+        - promptLibrary
+      summary: Creates an entry in the prompt library.
+      operationId: add_to_prompt_library
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Prompt"
+      responses:
+        "200":
+          description: Returns the unique id assigned to the prompt
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.prompt_library_controller
+    get:
+      tags:
+        - promptLibrary
+      summary: Retrieves prompts matching the query parameters.
+      operationId: get_prompts_for_workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: docId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: promptType
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: queryScope
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns list of prompts matching the query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prompt'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.prompt_library_controller
+
+  /workspaceFilter:
+    post:
+      tags:
+        - workspaceFilter
+      summary: Add a workspace filter
+      operationId: add_workspace_filter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceFilter'
+      responses:
+        "200":
+          description: Workspace filter added
+      x-openapi-router-controller: server.controllers.workspace_filter_controller
+    get:
+      tags:
+        - workspaceFilter
+      summary: Get workspace filters by user_id or workspace_id
+      operationId: get_workspace_filter
+      parameters:
+        - name: workspaceId
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+        - name: userId
+          in: query
+          required: false
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Workspace filter added
+      x-openapi-router-controller: server.controllers.workspace_filter_controller
+
+  /workspaceFilter/modify/{workspaceFilterId}:
+    post:
+      tags:
+        - workspaceFilter
+      summary: modify a workspace filter by id
+      operationId: modify_workspace_filter
+      parameters:
+        - name: workspaceFilterId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceFilter'
+      responses:
+        "200":
+          description: Workspace filter added
+      x-openapi-router-controller: server.controllers.workspace_filter_controller
+
+  /workspaceFilter/delete/{workspaceFilterId}:
+    post:
+      tags:
+        - workspaceFilter
+      summary: Delete a workspace filter by id
+      operationId: delete_workspace_filter
+      parameters:
+        - name: workspaceFilterId
+          in: path
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Workspace filter added
+      x-openapi-router-controller: server.controllers.workspace_filter_controller
+
+  /searchCriteriaWorkflow:
+    post:
+      tags:
+        - searchCriteriaWorkflow
+      summary: Creates a workflow actions based on the Search Criteria.
+      operationId: create_search_criteria_workflow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchCriteriaWorkflow"
+      responses:
+        "200":
+          description: Returns the unique id assigned to the workflow
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.search_criteria_workflow_controller
+    get:
+      tags:
+        - searchCriteriaWorkflow
+      summary: Retrieves search criteria based workflows for the user and workspace if specified.
+      operationId: get_search_criteria_workflows_for_user
+      parameters:
+        - name: workspaceId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns list of workflows matching the query
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchCriteriaWorkflow'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.search_criteria_workflow_controller
+
+  /userAccessControl:
+    post:
+      tags:
+        - userAccessControl
+      summary: Creates / Updates access control list for a user.
+      operationId: update_user_acl
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAccessControl"
+      responses:
+        "200":
+          description: Returns a unique id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdWithMessage"
+      x-openapi-router-controller: server.controllers.user_acl_controller
+    get:
+      tags:
+        - userAccessControl
+      summary: Retrieves access control list for the user.
+      operationId: get_user_acl
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+        - name: emailId
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the access control list for the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserAccessControl'
+                x-content-type: application/json
+      x-openapi-router-controller: server.controllers.user_acl_controller
+
+
+security:
+  - jwt: ['admin']
+components:
+  schemas:
+    TaskQuery:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: ""
+        workspace_idx:
+          type: string
+          example: ""
+        doc_id:
+          type: string
+          example: ""
+        task_name:
+          type: string
+          example: ""
+        status:
+          type: string
+          example: "completed"
+        offset:
+          type: integer
+          example: 0
+        task_per_page:
+          type: integer
+          example: 10000
+    HTMLUpload:
+      type: object
+      properties:
+        url:
+          type: string
+          example: https://www.nlmatics.com/
+        html_selector:
+          type: object
+          properties:
+            html_tag:
+              type: string
+              example: "div"
+            html_name:
+              type: string
+              nullable: true
+              example: "class"
+            html_value:
+              type: string
+              nullable: true
+              example: "main"
+        title_selector:
+          type: array
+          items:
+            type: string
+          example: ["title", "filename", "FILENAME"]
+        use_headless:
+          type: boolean
+          example: false
+        crawl_depth:
+          type: integer
+          example: 0
+        root_domain:
+          type: string
+          nullable: true
+          example: "https://www.nlmatics.com/"
+        allowed_domain:
+          type: string
+          nullable: true
+          example: "https://www.nlmatics.com/"
+        upload_pdf:
+          type: boolean
+          example: true
+        pdf_only:
+          type: boolean
+          example: true
+        request_headers:
+          type: array
+          items:
+            type: object
+            properties:
+              request_header:
+                type: string
+                example: "Referer"
+              request_value:
+                type: string
+                example: "https://www.nlmatics.com/"
+    AccessToken:
+      type: object
+      properties:
+        access_token:
+          type: string
+    RefreshToken:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+    DeveloperApiKey:
+      type: object
+      properties:
+        api_key:
+          type: string
+        app_id:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        emailId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        active:
+          type: boolean
+        isAdmin:
+          type: boolean
+        createdOn:
+          type: string
+          format: date-time
+        hasDeveloperAccount:
+          type: boolean
+          default: false
+        developerAppId:
+          type: string
+        expiry_time:
+          type: string
+          format: date-time
+        subscription_plan:
+          type: string
+        accessType:
+          type: string
+        lastLogin:
+          type: string
+          format: date-time
+        hasNotifications:
+          type: boolean
+          default: false
+        workspaceNotificationSettings:
+          type: array
+          items:
+            type: object
+        subscribedWorkspaces:
+          type: array
+          items:
+            type: string
+        includedFeatures:
+          type: array
+          items:
+            type: string
+        stripeConf:
+          type: object
+      example:
+        firstName: firstName
+        lastName: lastName
+        active: true
+        emailId: emailId
+        id: id
+        createdOn: 2000-01-23T04:56:07.000+00:00
+        hasDeveloperAccount: false
+        expiry_time: 2031-08-30 21:41:55 EST-0500
+        subscription_plan: BASIC
+        lastLogin: 2021-08-30 21:41:55 EST-0500
+    IdWithMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+      example:
+        id: id
+        message: message
+    BBox:
+      type: object
+      properties:
+        blockId:
+          type: integer
+          example: 0
+        pageId:
+          type: integer
+          example: 0
+        blockType:
+          type: string
+          example: table
+        bbox:
+          type: array
+          items:
+            type: number
+          example: [1.0, 1.0, 3.0, 3.0]
+        audited:
+          type: boolean
+          example: true
+    SearchCriteria:
+      type: object
+      properties:
+        criterias:
+          type: array
+          items:
+            type: object
+            properties:
+              question:
+                type: string
+                example: "what is the offering price?"
+              templates:
+                type: array
+                items:
+                  type: string
+                example: ["public initial price per share"]
+              headers:
+                type: array
+                items:
+                  type: string
+                example: ["the offering"]
+              expectedAnswerType:
+                type: string
+                example: "auto"
+              groupFlag:
+                type: string
+                enum:
+                  - disable
+                  - auto
+                  - enable
+                default: auto
+              tableFlag:
+                type: string
+                enum:
+                  - disable
+                  - auto
+                  - enable
+                default: auto
+              pageStart:
+                type: integer
+                example: -1
+              pageEnd:
+                type: integer
+                example: -1
+              criteriaRank:
+                type: integer
+                example: -1
+              enableSimilarSearch:
+                type: boolean
+                example: true
+              entityTypes:
+                type: array
+                items:
+                  type: string
+                example: ["GENE", "DISEASE"]
+              beforeContextWindow:
+                type: integer
+                example: 0
+              afterContextWindow:
+                type: integer
+                example: 0
+        extractors:
+          type: array
+          items:
+            type: string
+          example: []
+        postProcessors:
+          type: array
+          items:
+            type: string
+          example: []
+        aggregatePostProcessors:
+          type: array
+          items:
+            type: string
+          example: []
+        docPerPage:
+          type: integer
+          example: 20
+        offset:
+          type: integer
+          example: 0
+        matchPerDoc:
+          type: integer
+          example: 20
+        debug:
+          type: boolean
+          example: true
+        topn:
+          type: integer
+          example: 3
+        groupByFile:
+          type: boolean
+          default: true
+        searchType:
+          type: string
+        fieldFilter:
+          type: object
+        docFilters:
+          type: array
+          items:
+            type: string
+          example: []
+        disableExtraction:
+          type: boolean
+          default: false
+        abstractiveProcessors:
+          type: array
+          items:
+            type: string
+          example: []
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        userId:
+          type: string
+        active:
+          type: boolean
+          default: true
+        sharedWith:
+          type: array
+          items:
+            type: string
+        createdOn:
+          type: string
+          format: date-time
+        settings:
+          type: object
+        statistics:
+          type: object
+        collaborators:
+          type: object
+        subscribedUsers:
+          type: array
+          items:
+            type: string
+      example:
+        name: name
+        active: true
+        id: id
+        userId: userId
+        createdOn: 2000-01-23T04:56:07.000+00:00
+    Field:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        active:
+          type: boolean
+          default: true
+        userId:
+          type: string
+        workspaceId:
+          type: string
+        isUserDefined:
+          type: boolean
+          default: true
+        isEnteredField:
+          type: boolean
+          default: false
+        parentBundleId:
+          type: string
+          nullable: true
+        dataType:
+          type: string
+        options:
+          type: object
+        status:
+          type: object
+        isDependentField:
+          type: boolean
+          default: false
+        searchCriteria:
+          $ref: '#/components/schemas/SearchCriteria'
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+        active:
+          type: boolean
+          default: true
+        fieldId:
+          type: string
+        templateType:
+          type: string
+          enum:
+            - phrase
+            - question
+        text:
+          type: string
+        index:
+          type: integer
+    DocumentFolder:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        workspaceId:
+          type: string
+        parentFolder:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        isDeleted:
+          type: boolean
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        name:
+          type: string
+        docLocation:
+          type: string
+        userId:
+          type: string
+        workspaceId:
+          type: string
+        parentFolder:
+          type: string
+        fileSize:
+          type: number
+        mimeType:
+          type: string
+        checksum:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        isDeleted:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - ready_for_ingestion
+            - ingest_inprogress
+            - ingest_failed
+            - ingest_ok
+        renderedFileLocation:
+          type: string
+        renderedJsonFileLocation:
+          type: string
+        sourceUrl:
+          type: string
+        update:
+          type: boolean
+        inferred_title:
+          type: string
+      example:
+        parentFolder: parentFolder
+        docLocation: docLocation
+        isDeleted: true
+        fileSize: 0.80082819046101150206595775671303272247314453125
+        name: name
+        checksum: checksum
+        id: id
+        mimeType: mimeType
+        createdOn: 2000-01-23T04:56:07.000+00:00
+        workspaceId: workspaceId
+
+    SearchHistory:
+      type: object
+      properties:
+        user_id:
+          type: string
+        doc_id:
+          type: string
+        workspace_id:
+          type: string
+        question:
+          type: array
+          items:
+            type: string
+        pattern:
+          type: array
+          items:
+            type: string
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    FieldBundle:
+      type: object
+      properties:
+        bundleName:
+          type: string
+        id:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        parentBundleId:
+          type: string
+        userId:
+          type: string
+        workspaceId:
+          type: string
+        active:
+          type: boolean
+        cachedFile:
+          type: string
+        bundleType:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        fieldIds:
+          type: array
+          items:
+            type: string
+        workspaceFilterIds:
+          type: array
+          items:
+            type: string
+      example:
+        parentBundleId: parentBundleId
+        bundleId: bundleId
+        bundleName: bundleName
+        active: true
+        createdOn: 2000-01-23T04:56:07.000+00:00
+        userId: userId
+        workspaceId: workspaceId
+        bundleType: PUBLIC
+
+    FieldValue:
+      type: object
+      properties:
+        fieldId:
+          type: string
+        docId:
+          type: string
+        workspaceId:
+          type: string
+        fieldBundleId:
+          type: string
+        selectedRow:
+          type: object
+      example:
+        docId: docId
+        fieldId: fieldId
+        workspaceId: workspaceId
+        selectedRow: selectedRow
+
+    IgnoreBlock:
+      type: object
+      properties:
+        ignoreText:
+          type: string
+        ignoreAllAfter:
+          type: boolean
+          default: false
+        workspaceId:
+          type: string
+        blockType:
+          type: string
+      example:
+        ignoreText: 'Disclosure Section'
+        ignoreAllAfter: false
+        blockType: header
+
+    IngestTestCase:
+      type: object
+      properties:
+        correct:
+          type: boolean
+        correctText:
+          type: string
+        correctType:
+          type: string
+        blockText:
+          type: string
+        blockType:
+          type: string
+        blockHtml:
+          type: string
+        pageIdx:
+          type: integer
+        documentId:
+          type: string
+        workspaceId:
+          type: string
+      example:
+        correct: true
+        blockHtml: <h4>Executive Summary</h4>
+        correctText: Executive Summary
+        correctType: header
+        blockText: Executive Summary
+        blockType: header
+        pageIdx: 1
+        documentId: a1s3dfbc
+        workspaceId: bdfs3dfbc
+
+    IngestTableTestCase:
+      type: object
+      properties:
+        doc_id:
+          type: string
+        user_id:
+          type: string
+        workspace_id:
+          type: string
+        html_text:
+          type: string
+        tag:
+          type: string
+      example:
+        blockHtml: <table></table>
+        doc_id: a1s3dfbc
+        user_id: bdfs3dfbc
+        workspace_id: bdfs3dfbc
+        tag: test
+
+    SearchResult:
+      type: object
+      properties:
+        userId:
+          type: string
+        workspaceId:
+          type: string
+        docId:
+          type: string
+        headerText:
+          type: string
+        groupType:
+          type: string
+        userReport:
+          type: object
+        tags:
+          type: array
+          items:
+            type: string
+        rawScores:
+          type: object
+        searchAnswer:
+          $ref: '#/components/schemas/ResultRow'
+        searchCriteria:
+          $ref: '#/components/schemas/SearchCriteria'
+
+    SavedSearchResult:
+      type: object
+      properties:
+        uniqueId:
+          type: string
+        userId:
+          type: string
+        userName:
+          type: string
+        workspaceId:
+          type: string
+        docId:
+          type: string
+        action:
+          type: string
+        status:
+          type: string
+        createdOn:
+          type: string
+          format: date-time
+        searchResult:
+          type: object
+        searchCriteria:
+          $ref: '#/components/schemas/SearchCriteria'
+
+    Audit:
+      type: object
+      properties:
+        docName:
+          type: string
+        selfEnteredCnt:
+          type: string
+        overridenCnt:
+          type: string
+        totalEdits:
+          type: string
+        pctEntered:
+          type: string
+        pctOverriden:
+          type: string
+        pctTotal:
+          type: string
+      example:
+        docName: docName
+        selfEnteredCnt: 0
+        overridenCnt: 0
+        totalEdits: 0
+        pctEntered: 0.0
+        pctOverriden: 0.0
+        pctTotal: 0.0
+
+    ResultRow:
+      type: object
+      properties:
+        fileId:
+          type: string
+        fileName:
+          type: string
+        phrase:
+          type: string
+        matchIdx:
+          type: number
+        pageIdx:
+          type: number
+        level:
+          type: string
+        answer:
+          type: string
+        formattedAnswer:
+          type: string
+        matchScore:
+          type: number
+        answerScore:
+          type: number
+        scaledScore:
+          type: number
+        questionScore:
+          type: number
+
+    DocumentKeyInfo:
+      type: object
+      properties:
+        sectionSummary:
+          type: array
+          items:
+            $ref: '#/components/schemas/SectionSummary'
+        keyValuePairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        docEnt:
+          type: object
+        referenceDefinitions:
+          type: object
+
+    SectionSummary:
+      type: object
+      properties:
+        title:
+          type: string
+        block:
+          $ref: '#/components/schemas/Block'
+        n_quoted_words:
+          type: number
+        noun_chunks:
+          type: array
+          items:
+            type: string
+
+    Block:
+      type: object
+      properties:
+        blockIdx:
+          type: number
+        pageIdx:
+          type: number
+        blockText:
+          type: string
+        headerText:
+          type: string
+
+    KeyValuePair:
+      type: object
+      properties:
+        block:
+          $ref: '#/components/schemas/Block'
+        all_quoted_words:
+          type: array
+          items:
+            type: string
+        key:
+          type: string
+        value:
+          type: string
+
+    body:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+    body_1:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+    body_2:
+      type: object
+      properties:
+        bundleId:
+          type: string
+        bundleName:
+          type: string
+        workspaceId:
+          type: string
+        userId:
+          type: string
+    RenameDoc:
+      type: object
+      properties:
+        newName:
+          type: string
+    PreferedWorkspace:
+      type: object
+      properties:
+        defaultWorkspaceId:
+          type: string
+        userId:
+          type: string
+    TemplateToFile:
+      type: object
+      properties:
+        extractionTemplateId:
+          type: string
+        documentId:
+          type: string
+    FieldBundleContent:
+      allOf:
+        - $ref: '#/components/schemas/FieldBundle'
+        - type: object
+          properties:
+            fields:
+              type: array
+              items:
+                $ref: '#/components/schemas/FieldContent'
+    FieldContent:
+      allOf:
+        - $ref: '#/components/schemas/Field'
+        - type: object
+          properties:
+            templates:
+              type: array
+              items:
+                $ref: '#/components/schemas/Template'
+
+
+    AnswerSummary:
+      type: object
+      properties:
+        pageIdx:
+          type: integer
+        blockIdx:
+          type: number
+        blockType:
+          type: string
+        phrase:
+          type: string
+        header_text:
+          type: string
+      example:
+        pageIdx: 1
+        blockIdx: 20
+        blockType: para
+        phrase: Here we find the answer to the question asked
+        header_text: HEADER 1
+
+
+    AnswerContent:
+      type: object
+      properties:
+        content:
+          $ref: '#/components/schemas/AnswerSummary'
+        labels:
+          type: object
+        rawScores:
+          type: object
+      example:
+        content: {
+          "pageIdx": 1,
+          "blockIdx": 20,
+          "blockType": "para",
+          "phrase": "Here we find the answer to the question asked",
+          "header_text": "HEADER 1",
+        }
+        labels: {"span":[start_pos, end_pos], "boolean": "yes"}
+        rawScores: {"qnli_score":0.99, "squad_score": 0.98, "match_score":1,"relevancy_score": 0.7}
+
+
+    TrainSample:
+      type: object
+      properties:
+        docId:
+          type: string
+        workspaceId:
+          type: string
+        id:
+          type: string
+        created_on:
+          type: string
+        train_state:
+          type: string
+        model_to_train:
+          type: string
+        criteria:
+          $ref: '#/components/schemas/SearchCriteria'
+        topAnswer:
+          $ref: '#/components/schemas/AnswerContent'
+        selectedAnswer:
+          $ref: '#/components/schemas/AnswerContent'
+
+
+    MetricData:
+      type: object
+      properties:
+        catalog_id:
+          type: string
+        feature:
+          type: string
+        used:
+          type: string
+        quota:
+          type: string
+        percentUsed:
+          type: string
+
+    UsageMetric:
+      type: object
+      properties:
+        user_id:
+          type: string
+        reported_on:
+          type: string
+        subscription_detail:
+          type: string
+        general_usage:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricData'
+        dev_api_usage:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricData'
+
+    Notifications:
+      type: object
+      properties:
+        _id:
+          type: string
+        user_id:
+          type: string
+        is_read:
+          type: boolean
+        notify_action:
+          type: string
+        created_on:
+          type: string
+          format: date-time
+        notify_params:
+          type: object
+
+    WorkspaceFilter:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        active:
+          type: boolean
+          default: true
+        userId:
+          type: string
+        workspaceId:
+          type: string
+        isUserDefined:
+          type: boolean
+          default: true
+        isDefault:
+          type: boolean
+          default: false
+        options:
+          type: object
+        status:
+          type: object
+        searchCriteria:
+          $ref: '#/components/schemas/FilterSearchCriteria'
+        dataCriteria:
+          $ref: '#/components/schemas/FilterDataCriteria'
+
+    FilterDataCriteria:
+      type: object
+      properties:
+        criterias:
+          type: array
+          items:
+            type: object
+            properties:
+              fieldId:
+                type: string
+              operationType:
+                type: string
+                enum:
+                  - equals
+                  - contains
+                  - startsWith
+                  - between
+                default: equals
+              options:
+                type: object
+              negativeCondition:
+                type: boolean
+                default: false
+
+    FilterSearchCriteria:
+      type: object
+      properties:
+        criterias:
+          type: array
+          items:
+            type: object
+            properties:
+              keywords:
+                type: array
+                items:
+                  type: string
+                example: ["public initial price per share"]
+              headers:
+                type: array
+                items:
+                  type: string
+                example: ["the offering"]
+              tableFlag:
+                type: string
+                enum:
+                  - disable
+                  - auto
+                  - enable
+                default: auto
+              pageStart:
+                type: integer
+                example: -1
+              pageEnd:
+                type: integer
+                example: -1
+              criteriaRank:
+                type: integer
+                example: -1
+              criteriaCondition:
+                type: string
+                enum:
+                  - must
+                  - should
+                default: must
+
+    PaginationSettings:
+      type: object
+      properties:
+        docPerPage:
+          type: integer
+          example: 20
+        offset:
+          type: integer
+          example: 0
+        matchPerDoc:
+          type: integer
+          example: 20
+        debug:
+          type: boolean
+          example: true
+        topn:
+          type: integer
+          example: 3
+
+    GridSelector:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+        fieldBundleId:
+          type: string
+        docIds:
+          type: array
+          items:
+            type: string
+        fieldIds:
+          type: array
+          items:
+            type: string
+        overwriteCache:
+          type: string
+        gridQuery:
+          type: object
+        distinctField:
+          type: string
+        returnTopFactAnswer:
+          type: boolean
+          default: false
+
+    UserFeedback:
+      type: object
+      properties:
+        ratingStars:
+          type: number
+        feedback:
+          type: string
+
+    WaitList:
+      type: object
+      properties:
+        appName:
+          type: string
+        waitListType:
+          type: string
+
+    AnonymizeText:
+      type: object
+      properties:
+        text:
+          type: string
+
+    DeAnonymizeText:
+      type: object
+      properties:
+        uuid:
+          type: string
+        text:
+          type: string
+
+    Prompt:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        docId:
+          type: string
+        queryScope:
+          type: string
+        promptType:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+        searchCriteria:
+          type: object
+
+    SearchCriteriaWorkflow:
+      type: object
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        docId:
+          type: string
+        searchCriteria:
+          type: object
+        actions:
+          type: array
+          items:
+            type: string
+
+    UserAccessControl:
+      type: object
+      properties:
+        accessControlList:
+          type: array
+          items:
+            type: string
+        userId:
+          type: string
+        emailId:
+          type: string
+
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: server.auth.authenticate

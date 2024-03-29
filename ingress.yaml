@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dev-generic-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "dev-panini-static-ip"
+    networking.gke.io/managed-certificates: devportal-certificate
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: svc-nlm-react
+              servicePort: 80
+          - path: /api/*
+            backend:
+              serviceName: svc-nlm-services-v2
+              servicePort: 80

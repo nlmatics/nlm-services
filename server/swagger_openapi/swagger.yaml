@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: NLM Service API
+  description: API specification for nlm-service
+  contact:
+    email: support@nlmatics.com
+  version: 2.2.13
+servers:
+  - url: http://localhost:5000/api
+    description: NLMATICS Service API Endpoint
+tags:
+  - name: health
+    description: endpoint for health check-
+  - name: document
+    description: API to upload, query and download documents
+
+paths:
+  /healthz:
+    get:
+      tags:
+        - health
+      summary: Health check
+      operationId: health_check
+      responses:
+        "200":
+          description: Returns string 'Healthy!'
+          content:
+            text/plain:
+              schema:
+                type: string
+                x-content-type: text/plain
+      x-openapi-router-controller: server.controllers.health_controller
+      security: []
+
+  /document/developer/parseDocument:
+    post:
+      tags:
+        - document
+      summary: Upload a new document and parse
+      operationId: parse_document
+      parameters:
+        - name: renderFormat
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: string
+        - name: startPage
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+        - name: endPage
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/body'
+      responses:
+        "200":
+          description: id of the newly created document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdWithMessage'
+      x-openapi-router-controller: server.controllers.document_controller
+      security: []
+
+security:
+  - jwt: ['admin']
+components:
+  schemas:
+
+    body:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+
+    IdWithMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        message:
+          type: string
+      example:
+        id: id
+        message: message
+
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: server.auth.authenticate
