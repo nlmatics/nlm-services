@@ -10,7 +10,7 @@ msal==1.23.0
 faker
 flask==2.2.5
 flask-cors==3.0.10
-python-magic==0.4.24
+python-magic==0.4.22
 firebase-admin==4.5.2
 pandas==1.2.4
 tika==1.24
