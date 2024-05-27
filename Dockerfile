@@ -12,8 +12,7 @@ RUN apt-get update; apt-get -s dist-upgrade | grep "^Inst" | grep -i securi | aw
     && rm -rf /var/lib/{apt,dpkg,cache,log}
 
 # install Java
-RUN --mount=type=ssh,id=github_ssh_key \
-    mkdir -p /usr/share/man/man1 \
+RUN mkdir -p /usr/share/man/man1 \
     && apt-get update \
     && apt-get install -y \
     openjdk-11-jre-headless \
@@ -38,10 +37,10 @@ RUN --mount=type=ssh,id=github_ssh_key \
     && apt install -y /app/google-chrome-stable_current_amd64.deb \
     && unzip /app/chromedriver_linux64.zip -d /app/ \
     && cp /app/chromedriver-linux64/chromedriver /app/ \
+    && wget https://github.com/nlmatics/nlm-ingestor/raw/main/jars/tika-server-standard-nlm-modified-2.4.1_v6.jar -O /app/tika-server.jar \
+    && wget https://github.com/nlmatics/nlm-ingestor/raw/main/jars/tika-server-config-default.xml -O /app/tika-server-config.xml \
     && ln -s /app/tika-server.jar /tmp/tika-server.jar \
     && touch /tmp/tika-server.jar.md5 \
-    && ln -s /app/onco_gene_dict.json /tmp/onco_gene_dict.json \
-    && ln -s /app/onco_disease_dict.json /tmp/onco_disease_dict.json \
     && apt purge -y build-essential\
     && apt-get clean autoclean \
     && apt-get autoremove -y \
