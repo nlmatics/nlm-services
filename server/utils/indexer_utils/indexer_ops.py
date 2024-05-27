@@ -298,6 +298,7 @@ def ingest_document(doc: DocumentInfo,
                     ):
     logger.info("Ingestion started")
     print("parse options", parse_options)
+    parse_options = parse_options or {}
     doc_id = doc.id
     mime_type = doc.mime_type
     file_to_ingest = None
